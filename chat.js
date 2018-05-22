@@ -108,9 +108,6 @@ function processTxt(from_address, text) {
 
 		}
 
-		if (users[0].current_room === 0 || text == "administrationMenu" || assocPeers[from_address].administrationMenu)
-			return returnAdministrationMenu(from_address);
-
 		if (users[0].current_room > 0)
 			return sendToRoom(from_address, users[0].current_room, users[0].name, text);
 
