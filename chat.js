@@ -91,10 +91,11 @@ function processTxt(from_address, text) {
 
 	db.query("SELECT * FROM users WHERE device_address=?", [from_address], function(users) {
 
-		if (text == "help" || !users[0])
+		if (text == "help" || !users[0]) {
 			assocPeers[from_address].step = "home";
 			return returnHelpMenu(from_address, (users[0] ? users[0].current_room : 0));
-
+		}
+		
 		if (text == "createRoom" || assocPeers[from_address].step == "waitingForRoomName") {
 			return createRoom(from_address, text);
 		}
