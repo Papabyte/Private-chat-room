@@ -1,0 +1,12 @@
+{
+	"name": "private-chat-room",
+	"version": "1.0.0",
+	"description": "Documentation and examples to use the betting-bot API",
+	"main": "chat.js",
+	"author": "papabyte.com",
+	"license": "MIT",
+	"dependencies": {
+		"byteballcore": "git+https://github.com/byteball/byteballcore.git",
+		"headless-byteball": "git+https://github.com/byteball/headless-byteball.git"
+	}
+}
