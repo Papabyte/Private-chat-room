@@ -65,7 +65,7 @@ function returnHelpMenu(from_address, currentRoom) {
 
 	db.query("SELECT rooms.id AS room_id, rooms.name AS room_name FROM rooms WHERE id=?", [currentRoom], function(rows) {
 		if (rows[0] && currentRoom > 0) {
-			returnedTxt += "\nYou are actually connected to room " + rows[0].room_name + " (id " + currentRoom + ")";
+			returnedTxt += "\nYou are connected to room " + rows[0].room_name + " (id " + currentRoom + ")";
 			returnedTxt += "\nThe text that you type will be sent to every member of this room.";
 		} else {
 			returnedTxt += "\nYou are not connected to any room.";
