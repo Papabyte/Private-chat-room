@@ -6,6 +6,7 @@ const headlessWallet = require('headless-byteball');
 const conf = require('byteballcore/conf.js');
 const randomCryptoString = require('./modules/random-crypto-string');
 const db = require('byteballcore/db.js');
+require('./modules/create_tables.js');
 
 var assocPeers = [];
 
