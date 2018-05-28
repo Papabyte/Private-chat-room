@@ -23,16 +23,8 @@ eventBus.on('paired', function(from_address, pairing_secret) {
 			conn.addQuery(arrQueries, "COMMIT");
 			async.series(arrQueries, function() {
 				conn.release();
-				if (rooms[0]) {
-					var device = require('byteballcore/device.js');
-					db.query("SELECT device_address,(SELECT name FROM users WHERE device_address=?) AS name FROM users WHERE current_room = ? AND device_address!=?", [from_address, rooms[0].id,from_address], function(rows) {
-						rows.forEach(function(row) {
-							device.sendMessageToDevice(row.device_address, 'text', row.name + " has joined your room");
-						});
-					});
-
-				}
-
+				if (rooms[0])
+					sendUserJoinedRoomMessage(from_address,rooms[0].id);
 				return returnHelpMenu(from_address, (rooms[0] ? rooms[0].id : 0));
 			});
 		});
@@ -45,6 +37,26 @@ eventBus.on('paired', function(from_address, pairing_secret) {
 eventBus.on('text', function(from_address, text) {
 	processTxt(from_address, text);
 });
+
+function sendUserJoinedRoomMessage(userDeviceAddress, room_ID){
+	var device = require('byteballcore/device.js');
+	db.query("SELECT device_address,(SELECT name FROM users WHERE device_address=?) AS name FROM users WHERE current_room = ? AND device_address!=?", [userDeviceAddress, room_ID, userDeviceAddress], function(rows) {
+		rows.forEach(function(row) {
+			device.sendMessageToDevice(row.device_address, 'text', row.name + " has joined your room");
+		});
+	});
+}
+
+function sendUserLeftHisRoomMessage(userDeviceAddress, room_ID){
+	var device = require('byteballcore/device.js');
+	db.query("SELECT device_address,(SELECT name FROM users WHERE device_address=?) AS name FROM users WHERE current_room=(SELECT current_room FROM users WHERE device_address=?) AND device_address!=?", [userDeviceAddress, userDeviceAddress, userDeviceAddress], function(rows) {
+		rows.forEach(function(row) {
+			device.sendMessageToDevice(row.device_address, 'text', row.name + " has left your room");
+		});
+	});
+}
+
+
 
 function returnHelpMenu(from_address, currentRoom) {
 	var device = require('byteballcore/device.js');
@@ -111,17 +123,19 @@ function processTxt(from_address, text) {
 		}
 
 		if (users[0].current_room > 0)
-			return sendToRoom(from_address, users[0].current_room, users[0].name, text);
+			return sendMessageToRoom(from_address, users[0].current_room, users[0].name, text);
 
 	});
 }
 
-function connectToRoom(from_address, roomID) {
+function connectToRoom(from_address, room_ID) {
 	var device = require('byteballcore/device.js');
 
-	db.query("SELECT rooms.name AS room_name FROM allowed_access INNER JOIN rooms ON allowed_access.room=rooms.id WHERE device_address=? AND room=?", [from_address, roomID], function(rows) {
+	db.query("SELECT rooms.name AS room_name FROM allowed_access INNER JOIN rooms ON allowed_access.room=rooms.id WHERE device_address=? AND room=?", [from_address, room_ID], function(rows) {
 		if (rows[0]) {
-			db.query("UPDATE users SET current_room=? WHERE device_address=?", [roomID, from_address], function() {
+			sendUserLeftHisRoomMessage(from_address);
+			db.query("UPDATE users SET current_room=? WHERE device_address=?", [room_ID, from_address], function() {
+				sendUserJoinedRoomMessage(from_address, room_ID);
 				return device.sendMessageToDevice(from_address, 'text', "You switched to room " + rows[0].room_name);
 			});
 		} else {
@@ -183,16 +197,14 @@ function createRoom(from_address, text) {
 }
 
 
-function sendToRoom(from_address, roomId, name, text) {
+function sendMessageToRoom(from_address, room_ID, name, text) {
 	var device = require('byteballcore/device.js');
 
-	db.query("SELECT device_address FROM users WHERE current_room = ?", [roomId], function(rows) {
+	db.query("SELECT device_address FROM users WHERE current_room = ?", [room_ID], function(rows) {
 		rows.forEach(function(row) {
 			device.sendMessageToDevice(row.device_address, 'text', name + " (" + from_address.slice(0, 5) + "): " + text);
 		});
-
 	});
-
 
 }
 
