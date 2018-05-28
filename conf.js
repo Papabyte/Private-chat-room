@@ -12,5 +12,8 @@ exports.deviceName = 'Private chat room';
 exports.permanent_pairing_secret = '0000';
 exports.control_addresses = [''];
 
+exports.echoDisabled = false;
+exports.usersAllowedToCreateRoom = [];
+
 
 console.log('finished Private chat room configuration');

@@ -82,8 +82,8 @@ function returnHelpMenu(from_address, currentRoom) {
 			returnedTxt += "\n\nAt any time:"
 			returnedTxt += "\nType " + getTxtCommandButton("help") + " to return to this menu";
 			returnedTxt += "\nType " + getTxtCommandButton("changeName") + " to change your name";
-			returnedTxt += "\nType " + getTxtCommandButton("createRoom") + " to create a new room";
-
+			if (conf.usersAllowedToCreateRoom.length === 0 || conf.usersAllowedToCreateRoom.indexOf(from_address) > -1)
+				returnedTxt += "\nType " + getTxtCommandButton("createRoom") + " to create a new room";
 			returnedTxt += "\nThe bot operator has the technical possibility to see your conversation. To converse privately with your friend, better run the bot by yourself.\nhttps://github.com/Papabyte/Private-chat-room \nFork it and improve it!";
 			device.sendMessageToDevice(from_address, 'text', returnedTxt);
 		});
@@ -171,7 +171,9 @@ function changeName(from_address, text, previousName, currentRoom) {
 
 }
 
-function createRoom(from_address, text) {
+function createRoom(from_address, text, isFounder) {
+	if (conf.usersAllowedToCreateRoom.length > 0 && conf.usersAllowedToCreateRoom.indexOf(from_address) === 0)
+		return;
 	var device = require('byteballcore/device.js');
 	if (assocPeers[from_address].step == "waitingForRoomName") {
 		var pairingSecret = randomCryptoString.generateByLengthSync(20);
@@ -202,7 +204,8 @@ function sendMessageToRoom(from_address, room_ID, name, text) {
 
 	db.query("SELECT device_address FROM users WHERE current_room = ?", [room_ID], function(rows) {
 		rows.forEach(function(row) {
-			device.sendMessageToDevice(row.device_address, 'text', name + " (" + from_address.slice(0, 5) + "): " + text);
+			if (row.device_address != from_address || !conf.echoDisabled)
+				device.sendMessageToDevice(row.device_address, 'text', name + " (" + from_address.slice(0, 5) + "): " + text);
 		});
 	});
 
