@@ -38,6 +38,6 @@ When false, the user will see his posted message. When true, no echo will be rec
 
 
 ```
-exports.usersAllowedToCreateRoom = [''];
+exports.usersAllowedToCreateRoom = [];
 ```
 If array empty, anybody can create a chat room. If it contains at least 1 address, room creation is restricted to device addresses present in array.
