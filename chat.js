@@ -153,11 +153,12 @@ function changeName(from_address, text, previousName, currentRoom) {
 	if (assocPeers[from_address].step == "waitingForName") {
 		if (text.length <= 20) {
 			db.query("UPDATE users SET name=? WHERE device_address=?", [text, from_address], function() {
-				db.query("SELECT device_address FROM users WHERE current_room = ?", [currentRoom], function(rows) {
-					rows.forEach(function(row) {
-						device.sendMessageToDevice(row.device_address, 'text', previousName + " changed name for " + text);
+				if (currentRoom != 0)
+					db.query("SELECT device_address FROM users WHERE current_room = ?", [currentRoom], function(rows) {
+						rows.forEach(function(row) {
+							device.sendMessageToDevice(row.device_address, 'text', previousName + " changed name for " + text);
+						});
 					});
-				});
 
 				return assocPeers[from_address].step = "home";
 			});
