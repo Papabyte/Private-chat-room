@@ -6,6 +6,7 @@ exports.bSingleAddress = true;
 // Database
 exports.storage = 'sqlite';
 
+exports.LOG_FILENAME = '/dev/null';
 exports.bIgnoreUnpairRequests = true;
 exports.hub = 'byteball.org/bb';
 exports.deviceName = 'Private chat room';
