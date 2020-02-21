@@ -1,11 +1,11 @@
 /*jslint node: true */
 "use strict";
 const async = require('async');
-const eventBus = require('byteballcore/event_bus.js');
-const headlessWallet = require('headless-byteball');
-const conf = require('byteballcore/conf.js');
+const eventBus = require('ocore/event_bus.js');
+const headlessWallet = require('headless-obyte');
+const conf = require('ocore/conf.js');
 const randomCryptoString = require('./modules/random-crypto-string');
-const db = require('byteballcore/db.js');
+const db = require('ocore/db.js');
 require('./modules/create_tables.js');
 
 var assocPeers = [];
@@ -40,7 +40,7 @@ eventBus.on('text', function(from_address, text) {
 });
 
 function sendUserJoinedRoomMessage(userDeviceAddress, room_ID){
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 	db.query("SELECT device_address,(SELECT name FROM users WHERE device_address=?) AS name FROM users WHERE current_room = ? AND device_address!=?", [userDeviceAddress, room_ID, userDeviceAddress], function(rows) {
 		rows.forEach(function(row) {
 			device.sendMessageToDevice(row.device_address, 'text', row.name + " has joined your room");
@@ -49,7 +49,7 @@ function sendUserJoinedRoomMessage(userDeviceAddress, room_ID){
 }
 
 function sendUserLeftHisRoomMessage(userDeviceAddress, room_ID){
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 	db.query("SELECT device_address,(SELECT name FROM users WHERE device_address=?) AS name FROM users WHERE current_room=(SELECT current_room FROM users WHERE device_address=?) AND device_address!=?", [userDeviceAddress, userDeviceAddress, userDeviceAddress], function(rows) {
 		rows.forEach(function(row) {
 			device.sendMessageToDevice(row.device_address, 'text', row.name + " has left your room");
@@ -60,7 +60,7 @@ function sendUserLeftHisRoomMessage(userDeviceAddress, room_ID){
 
 
 function returnHelpMenu(from_address, currentRoom) {
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 	var returnedTxt = "Welcome to the private room chat bot.";
 
 	db.query("SELECT rooms.id AS room_id, rooms.name AS room_name FROM rooms WHERE id=?", [currentRoom], function(rows) {
@@ -130,7 +130,7 @@ function processTxt(from_address, text) {
 }
 
 function connectToRoom(from_address, room_ID) {
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 
 	db.query("SELECT rooms.name AS room_name FROM allowed_access INNER JOIN rooms ON allowed_access.room=rooms.id WHERE device_address=? AND room=?", [from_address, room_ID], function(rows) {
 		if (rows[0]) {
@@ -148,7 +148,7 @@ function connectToRoom(from_address, room_ID) {
 
 
 function changeName(from_address, text, previousName, currentRoom) {
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 
 	if (assocPeers[from_address].step == "waitingForName") {
 		if (text.length <= 20) {
@@ -176,7 +176,7 @@ function changeName(from_address, text, previousName, currentRoom) {
 function createRoom(from_address, text, isFounder) {
 	if (conf.usersAllowedToCreateRoom.length > 0 && conf.usersAllowedToCreateRoom.indexOf(from_address) === 0)
 		return;
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 	if (assocPeers[from_address].step == "waitingForRoomName") {
 		var pairingSecret = randomCryptoString.generateByLengthSync(20);
 		db.takeConnectionFromPool(function(conn) {
@@ -202,7 +202,7 @@ function createRoom(from_address, text, isFounder) {
 
 
 function sendMessageToRoom(from_address, room_ID, name, text) {
-	var device = require('byteballcore/device.js');
+	var device = require('ocore/device.js');
 
 	db.query("SELECT device_address FROM users WHERE current_room = ?", [room_ID], function(rows) {
 		rows.forEach(function(row) {

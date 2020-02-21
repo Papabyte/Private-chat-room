@@ -7,7 +7,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"async": "^1.5.2",
-		"byteballcore": "git+https://github.com/byteball/byteballcore.git",
-		"headless-byteball": "git+https://github.com/byteball/headless-byteball.git"
+		"ocore": "git+https://github.com/byteball/ocore.git",
+		"headless-obyte": "git+https://github.com/byteball/headless-obyte.git"
 	}
 }

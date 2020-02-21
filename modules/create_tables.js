@@ -1,6 +1,6 @@
 /*jslint node: true */
 "use strict";
-const db = require('byteballcore/db.js');
+const db = require('ocore/db.js');
 
 
 db.query("CREATE TABLE IF NOT EXISTS users (  \n\
